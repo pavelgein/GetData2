@@ -10,21 +10,10 @@ get_data <- function(path = "dataset.txt") {
     data[["Activity"]] <- name_activity(data[["Activity"]])
     len <- ncol(data)
     ## Divide into group by activities and subjects
-    factors_list <- list(data[["Activity"]], data[["Subject"]])
-    new_data <- split(data, factors_list)
-    ## Calculate averages 
-    new_data <- lapply(new_data, function(x) {
-                        x <- x[1 : (len - 2)] 
-                        colMeans(x)
-                        })
-    ## Convert a list of data.frames to one data.frame
-    new_data <- data.frame(do.call("rbind", new_data))
-    ## Add activity and subject columns
-    ans_data <- cbind(data.frame(do.call("rbind", 
-                                         strsplit(row.names(new_data), ".", fixed = TRUE))), 
-                      new_data)
-    names(ans_data)[1] <- "Subject"
-    names(ans_data)[2] <- "Activity"
+    ans_data <- aggregate(data[1 : (len - 2)], 
+                          by = list(Activity = data[["Activity"]], 
+                                    Subject = data[["Subject"]]),
+                          FUN = mean)
     ## Write data
     write.table(ans_data, path, row.name = FALSE, sep = ",")
     
